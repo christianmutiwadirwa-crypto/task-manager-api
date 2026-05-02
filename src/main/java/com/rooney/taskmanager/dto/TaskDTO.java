@@ -1,6 +1,7 @@
 package com.rooney.taskmanager.dto;
 
 import com.rooney.taskmanager.model.Priority;
+import com.rooney.taskmanager.model.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -19,4 +20,6 @@ public class TaskDTO {
     private LocalDate dueDate;
 
     private boolean completed;
+
+    private TaskStatus status;
 }

@@ -1,11 +1,15 @@
 package com.rooney.taskmanager.service;
 
 
+import com.rooney.taskmanager.dto.TaskDTO;
 import com.rooney.taskmanager.exception.ResourceNotFoundException;
 import com.rooney.taskmanager.model.Task;
 import com.rooney.taskmanager.model.Priority;
+import com.rooney.taskmanager.model.TaskStatus;
 import com.rooney.taskmanager.repository.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,6 +18,10 @@ import java.util.List;
 
 public class TaskService {
     private final TaskRepository taskRepository;
+
+    public List<Task> getAllTasksUnpaged() {
+        return taskRepository.findAll();
+    }
 
     public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
@@ -25,10 +33,8 @@ public class TaskService {
     }
 
     // Get All Tasks
-    public List<Task> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
-        markOverdueTasks(tasks);
-        return tasks;
+    public Page<Task> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable);
     }
 
     // Get Task by ID
@@ -57,14 +63,41 @@ public class TaskService {
     }
 
     // Filter by Priority
-    public List<Task> getTasksByPriority(Priority priority) {
-        return taskRepository.findByPriority(priority);
+    public Page<Task> getTasksByPriority(Priority priority, Pageable pageable) {
+        return taskRepository.findByPriority(priority, pageable);
     }
 
-    // Filter by Completion
-    public List<Task> getTasksByCompleted(boolean completed) {
-        return taskRepository.findByCompleted(completed);
+    public Page<Task> getTasksByCompleted(Boolean completed, Pageable pageable) {
+        return taskRepository.findByCompleted(completed, pageable);
     }
+    private TaskStatus determineStatus(Task task) {
+
+        if (task.isCompleted()) {
+            return TaskStatus.COMPLETED;
+        }
+
+        if (task.getDueDate() != null &&
+                task.getDueDate().isBefore(LocalDate.now())) {
+            return TaskStatus.OVERDUE;
+        }
+
+        return TaskStatus.ACTIVE;
+    }
+
+    public TaskDTO mapToDTO(Task task) {
+        TaskDTO dto = new TaskDTO();
+
+        dto.setTitle(task.getTitle());
+        dto.setDescription(task.getDescription());
+        dto.setPriority(task.getPriority());
+        dto.setDueDate(task.getDueDate());
+        dto.setCompleted(task.isCompleted());
+
+        dto.setStatus(determineStatus(task));
+
+        return dto;
+    }
+
 
     // 🔥 Business Logic: Mark Overdue Tasks
     private void markOverdueTasks(List<Task> tasks) {
