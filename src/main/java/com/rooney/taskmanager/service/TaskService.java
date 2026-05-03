@@ -87,6 +87,8 @@ public class TaskService {
     public TaskDTO mapToDTO(Task task) {
         TaskDTO dto = new TaskDTO();
 
+        dto.setId(task.getId());
+
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
         dto.setPriority(task.getPriority());
@@ -99,7 +101,7 @@ public class TaskService {
     }
 
 
-    // 🔥 Business Logic: Mark Overdue Tasks
+    // Business Logic: Mark Overdue Tasks
     private void markOverdueTasks(List<Task> tasks) {
         LocalDate today = LocalDate.now();
 

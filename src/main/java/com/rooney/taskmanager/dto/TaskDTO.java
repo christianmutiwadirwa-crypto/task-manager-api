@@ -22,4 +22,6 @@ public class TaskDTO {
     private boolean completed;
 
     private TaskStatus status;
+
+    private Long id;
 }
